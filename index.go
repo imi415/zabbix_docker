@@ -73,7 +73,7 @@ func main() {
 			m := make(map[string]string)
 			m["{#CONTAINER_ID}"] = ctn.ID
 			m["{#CONTAINER_IMAGE}"] = ctn.Image
-			m["{CONTAINER_NAME}"] = ctn.Names[0]
+			m["{#CONTAINER_NAME}"] = ctn.Names[0]
 			m["{#CONTAINER_IP}"] = ctn.Networks.Networks["eth0"].IPAddress
 			m["{#CONTAINER_STATE}"] = ctn.State
 			dscSt.Data = append(dscSt.Data, m)
