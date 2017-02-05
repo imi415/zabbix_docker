@@ -1,5 +1,7 @@
 # Docker Monitoring for Zabbix
 
+This small go plugin is for providing simple API wrapping for zabbix-agent's user parameter, and can be used with unmodified agent and server.
+
 ## API Reference
 
 |Method Calls|`$1`|`$2`|`$3`|`$4`|
@@ -16,3 +18,7 @@
 - [3]:Need to add discovery in zabbix dashboard
   - <1>: Discovery Type, `Container` or `Image`
   - <2>: ~~Get debug information for selected discovery.~~
+
+## Disclaimer
+Since this is my first Go program(except "hello-world"),  it could be *really* unreilable. Although I use it in our production environment, please think twice before use. Also please consider the following awesome projects.
+* [zabbix-docker-monitoring](https://github.com/monitoringartist/zabbix-docker-monitoring)
