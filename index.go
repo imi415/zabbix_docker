@@ -10,6 +10,10 @@ import (
 	"github.com/fsouza/go-dockerclient"
 )
 
+type discoveryStruct struct {
+	Data []map[string]string `json:"data"`
+}
+
 func main() {
 	endpoint := "unix:///var/run/docker.sock"
 	client, err := docker.NewClient(endpoint)
@@ -26,12 +30,14 @@ func main() {
 			fmt.Println(info.Images)
 		case "Containers":
 			fmt.Println(info.Containers)
-		case "ContainerPaused":
+		case "ContainersPaused":
 			fmt.Println(info.ContainersPaused)
-		case "ContainerRunning":
+		case "ContainersRunning":
 			fmt.Println(info.ContainersRunning)
-		case "ContainerStopped":
-			fmt.Println(info.ContainersRunning)
+		case "ContainersStopped":
+			fmt.Println(info.ContainersStopped)
+		case "ServerVersion":
+			fmt.Println(info.ServerVersion)
 		default:
 			fmt.Println("Parameter error")
 		}
@@ -45,6 +51,10 @@ func main() {
 			writeCache(os.Args[2], msg)
 		}
 		switch os.Args[3] {
+		case "CPU":
+			usage := msg.CPUStats.CPUUsage.TotalUsage - msg.PreCPUStats.CPUUsage.TotalUsage
+			sys := msg.CPUStats.SystemCPUUsage - msg.PreCPUStats.SystemCPUUsage
+			fmt.Printf("%.2f\n", float32(usage/sys*100))
 		case "network":
 			if os.Args[4] == "rx_bytes" {
 				fmt.Println(msg.Networks["eth0"].RxBytes)
@@ -56,6 +66,20 @@ func main() {
 		case "pids_stats":
 			fmt.Println(msg.PidsStats.Current)
 		}
+	case "Discovery":
+		ctnList, _ := client.ListContainers(docker.ListContainersOptions{All: false})
+		dscSt := new(discoveryStruct)
+		for _, ctn := range ctnList {
+			m := make(map[string]string)
+			m["{#CONTAINER_ID}"] = ctn.ID
+			m["{#CONTAINER_IMAGE}"] = ctn.Image
+			m["{CONTAINER_NAME}"] = ctn.Names[0]
+			m["{#CONTAINER_IP}"] = ctn.Networks.Networks["eth0"].IPAddress
+			m["{#CONTAINER_STATE}"] = ctn.State
+			dscSt.Data = append(dscSt.Data, m)
+		}
+		jsonBytes, _ := json.Marshal(dscSt)
+		fmt.Println(string(jsonBytes))
 	default:
 		fmt.Println("Parameter error")
 	}
@@ -65,7 +89,7 @@ func writeCache(filename string, stats *docker.Stats) bool {
 	data, _ := json.Marshal(stats)
 	err := ioutil.WriteFile(os.Getenv("HOME")+"/"+filename, data, 0644)
 	if err != nil {
-		os.Create(filename)
+		os.Create(os.Getenv("HOME") + "/" + filename)
 	}
 	ioutil.WriteFile(filename, data, 0644)
 	return true
