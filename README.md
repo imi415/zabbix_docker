@@ -5,6 +5,7 @@ This small go plugin is for providing simple API wrapping for zabbix-agent's use
 
 ## Usage
 
+- This agent caches resource data(JSON, named by container IDs) at $HOME(expected `/var/lib/zabbix` as user `zabbix`), please make sure this directory exists and we have write access to this directory.
 - Upload the user parameters file to `/etc/zabbix/zabbix\_agentd.d/`.
 - Upload the compiled binary to `/etc/zabbix/zabbix\_agentd.d/bin/`.
 - Import zabbix template file.
